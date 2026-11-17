@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101210"><meta name="description" content="Кадр — рабочая студия для генерации изображений и видео через OpenRouter.">
+  <title>Кадр / Студия генерации</title>
+  <link rel="icon" href="assets/mark.svg"><link rel="stylesheet" href="style.css?v=7">
+  <script defer src="api.js?v=4"></script><script defer src="mentions.js?v=3"></script><script defer src="app.js?v=7"></script>
+</head>
+<body>
+  <header>
+    <div class="head-inner"><a class="brand" href="#studio" aria-label="Кадр — студия"><img src="assets/mark.svg" alt="">КАДР<span class="brand-slash">/</span></a>
+    <nav><button id="studioNav" class="nav-item active"><i data-i="studio"></i>Студия</button></nav>
+    <div class="account"><button class="balance" id="balanceBtn"><i data-i="wallet"></i><span id="balance">Баланс —</span></button><button class="key-btn" id="openKey"><i data-i="key"></i><span>API-ключ</span></button></div></div>
+  </header>
+  <main id="studio">
+    <div class="workspace">
+      <section class="panel" aria-labelledby="formTitle">
+        <div class="panel-title"><i data-i="sliders"></i><h1 id="formTitle">Студия генерации</h1></div>
+        <form id="generator"><fieldset id="controls">
+          <div class="tabs"><button id="imageTab" type="button" aria-pressed="true"><i data-i="image"></i>Изображение</button><button id="videoTab" type="button" aria-pressed="false"><i data-i="video"></i>Видео</button></div>
+          <label for="model">Модель</label><select id="model"></select>
+          <div class="prompt-label"><label for="prompt">Промпт</label><button type="button" id="showSamples" class="history-picker">Примеры промптов</button><span id="count" class="mono">0</span></div>
+          <div class="prompt-editor">
+            <div class="prompt-mirror" id="promptMirror" aria-hidden="true"></div>
+            <textarea id="prompt" rows="6" placeholder="Опишите сцену, свет и детали кадра…" aria-describedby="mentionHint" aria-controls="mentionChoices" aria-autocomplete="list" required></textarea>
+            <div id="mentionChoices" role="listbox" aria-label="Референсы для промпта" hidden></div>
+          </div>
+          <small id="mentionHint" hidden>Введите @, чтобы выбрать прикреплённый референс.</small>
+          <div class="field-row"><div><label for="size" id="sizeLabel">Размер кадра</label><select id="size"></select></div><div><label for="quality" id="qualityLabel">Качество</label><select id="quality"></select></div></div>
+          <div class="field-row" id="videoExtra" hidden><div><label for="ratio">Формат</label><select id="ratio"></select></div><div><label for="sound">Звук</label><select id="sound"><option value="on">Со звуком</option><option value="off">Без звука</option></select></div></div>
+          <div class="ref-head"><label for="files">Референсы</label><button class="history-picker" type="button" id="chooseSaved"><i data-i="history"></i> Из истории</button></div>
+          <button type="button" id="dropzone"><i data-i="upload"></i><span><strong>Перетащите файлы</strong> или выберите</span></button><input id="files" type="file" multiple hidden><small id="fileHint"></small>
+          <div id="fileList"></div><div id="fileError" role="status"></div>
+        </fieldset>
+        <div class="panel-bottom"><div class="costline"><button id="estimateInfo" type="button">Оценка стоимости <i data-i="info"></i></button><b id="estimate" class="mono">—</b></div>
+        <button id="generate" type="submit"><i data-i="spark"></i><span>Сгенерировать</span><i data-i="arrow"></i></button></div></form>
+        <div id="feedback" role="status" hidden></div>
+      </section>
+      <section class="feed" id="feed" aria-labelledby="feedTitle">
+        <div class="feed-head"><h2 id="feedTitle">Мои генерации</h2><span id="feedCount" class="mono"></span></div>
+        <div class="feed-filters" id="feedFilters" aria-label="Тип генерации">
+          <button data-kind="all" aria-pressed="true">Все</button>
+          <button data-kind="image" aria-pressed="false"><i data-i="image"></i> Изображения</button>
+          <button data-kind="video" aria-pressed="false"><i data-i="video"></i> Видео</button>
+        </div>
+        <div id="feedStatus" role="status">Загружаем историю…</div>
+        <div id="feedEmpty" hidden><div class="empty-stack" aria-hidden="true"><img src="assets/concrete.jpg" alt=""><img src="assets/forest.jpg" alt=""><img src="assets/dune.jpg" alt=""></div><h3 id="emptyTitle">Здесь появятся ваши работы</h3><p id="emptyText">Создайте изображение или видео в студии.</p></div>
+        <div id="feedCards"></div>
+        <p id="feedSpend" hidden></p>
+      </section>
+    </div>
+  </main>
+  <dialog id="modal"><div class="dlg-head"><h2 id="modalTitle"></h2><button aria-label="Закрыть" title="Закрыть" id="closeDlg" class="icon-btn"><i data-i="close"></i></button></div><div id="dialogBody"></div></dialog>
+  <template id="keyForm"><form class="dlg-form"><label for="keyInput">Ключ OpenRouter</label><input id="keyInput" type="password" autocomplete="off" spellcheck="false" placeholder="sk-or-v1-…" required><p>Ключ хранится в этой вкладке и передаётся только в OpenRouter.</p><div class="form-actions"><a href="https://openrouter.ai/settings/keys" target="_blank" rel="noreferrer">Получить ключ ↗</a><button class="primary">Подключить</button></div><div class="message" role="status"></div></form></template>
+</body></html>
