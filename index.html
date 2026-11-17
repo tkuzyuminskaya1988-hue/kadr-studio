@@ -4,8 +4,8 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101210"><meta name="description" content="Кадр — рабочая студия для генерации изображений и видео через OpenRouter.">
   <title>Кадр / Студия генерации</title>
-  <link rel="icon" href="assets/mark.svg"><link rel="stylesheet" href="style.css?v=7">
-  <script defer src="api.js?v=4"></script><script defer src="mentions.js?v=3"></script><script defer src="app.js?v=7"></script>
+  <link rel="icon" href="assets/mark.svg"><link rel="stylesheet" href="style.css?v=8">
+  <script defer src="api.js?v=4"></script><script defer src="mentions.js?v=3"></script><script defer src="app.js?v=8"></script>
 </head>
 <body>
   <header>
@@ -51,6 +51,7 @@
       </section>
     </div>
   </main>
+  <div id="refPreview" aria-hidden="true" hidden></div>
   <dialog id="modal"><div class="dlg-head"><h2 id="modalTitle"></h2><button aria-label="Закрыть" title="Закрыть" id="closeDlg" class="icon-btn"><i data-i="close"></i></button></div><div id="dialogBody"></div></dialog>
   <template id="keyForm"><form class="dlg-form"><label for="keyInput">Ключ OpenRouter</label><input id="keyInput" type="password" autocomplete="off" spellcheck="false" placeholder="sk-or-v1-…" required><p>Ключ хранится в этой вкладке и передаётся только в OpenRouter.</p><div class="form-actions"><a href="https://openrouter.ai/settings/keys" target="_blank" rel="noreferrer">Получить ключ ↗</a><button class="primary">Подключить</button></div><div class="message" role="status"></div></form></template>
 </body></html>

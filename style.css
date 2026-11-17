@@ -23,6 +23,9 @@ dialog{width:min(490px,calc(100% - 28px));max-height:85vh;padding:22px;border:1p
 #mentionChoices span,.ref-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .history-picker{font-size:11px;color:var(--green);padding:3px 0}.history-picker svg{width:13px;height:13px}
 .ref-thumb,.history-thumb{width:48px;height:48px;flex-shrink:0;object-fit:cover;border-radius:5px;background:#272d23;color:var(--green)}
+.ref-thumb:is(img,video){cursor:zoom-in}
+#refPreview{position:fixed;z-index:30;pointer-events:none;overflow:hidden;border-radius:8px;background:#10120f;box-shadow:0 5px 24px #0009,0 0 0 1px #616755}
+#refPreview>img,#refPreview>video{display:block;width:100%;height:100%;object-fit:contain}
 .ref-card{display:grid;grid-template-columns:28px 48px minmax(0,1fr) auto;gap:7px;align-items:center;padding:6px;border:1px solid var(--line);border-radius:7px;margin-top:6px}
 .ref-grip{width:28px;height:44px;font-size:22px;color:var(--soft);cursor:grab;touch-action:none;user-select:none}
 .ref-grip:hover,.ref-grip:focus-visible{color:var(--green)}
