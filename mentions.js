@@ -1,6 +1,6 @@
 "use strict";
 // A deleted mention stays a single token even if its old number is later reused.
-const refToken = /\[удалён: @?(?:img|video|audio|ref)\d+\]|(?<![\p{L}\p{N}_@])(?:(?:@?(?:img|video|audio)|@ref)\d+(?![\p{L}\p{N}_])|@)/giu;
+const refToken = /\[(?:удалён|removed): @?(?:img|video|audio|ref)\d+\]|(?<![\p{L}\p{N}_@])(?:(?:@?(?:img|video|audio)|@ref)\d+(?![\p{L}\p{N}_])|@)/giu;
 const refPrefix = {image:"img",video:"video",audio:"audio"};
 function renumberReferences(previous, next, input) {
   const changes = new Map(), counts = {image:0,video:0,audio:0};
@@ -22,7 +22,7 @@ function renumberReferences(previous, next, input) {
     const token = match[0], key = tokenName(token);
     if (!changes.has(key)) continue;
     const tag = changes.get(key);
-    const replacement = tag ? (token.startsWith("@")?"@":"")+tag : "[удалён: "+token+"]";
+    const replacement = tag ? (token.startsWith("@")?"@":"")+tag : t("[удалён: ")+token+"]";
     input.setRangeText(replacement,match.index,match.index+token.length,"preserve");
   }
 }

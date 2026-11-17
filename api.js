@@ -13,7 +13,7 @@ const Router = (() => {
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
       const reasons = {401:"Проверьте API-ключ.",402:"Недостаточно кредитов OpenRouter.",403:"Для этого ключа доступ ограничен.",429:"OpenRouter просит немного подождать."};
-      const e = new Error([reasons[response.status] || "Ошибка OpenRouter " + response.status, data.error?.message].filter(Boolean).join(" "));
+      const e = uiError(()=>[t(reasons[response.status]) || t("Ошибка OpenRouter ") + response.status, data.error?.message].filter(Boolean).join(" "));
       e.status = response.status;
       throw e;
     }
@@ -32,7 +32,7 @@ const Router = (() => {
     return new Promise((resolve,reject) => {
       const r = new FileReader();
       r.onload = () => resolve(r.result);
-      r.onerror = () => reject(new Error("Не удалось прочитать файл."));
+      r.onerror = () => reject(uiError(()=>t("Не удалось прочитать файл.")));
       r.readAsDataURL(file);
     });
   }
@@ -62,13 +62,13 @@ const Router = (() => {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.success || !Array.isArray(data.files) || data.files.length !== files.length) {
-      throw new Error("Загрузка в TempFile не завершена. " + (data.error || "Код " + response.status) + ". Повторите загрузку.");
+      throw uiError(()=>t("Загрузка в TempFile не завершена. ") + (data.error || t("Код ") + response.status) + t(". Повторите загрузку."));
     }
     const uploaded = new Map(data.files.map(file=>[file.name,file]));
     for (const {ref,uploadName} of files) {
       const found = uploaded.get(uploadName);
       if (!found || Number(found.size)!==ref.file.size || typeof found.id!=="string" || !/^[a-zA-Z0-9_-]+$/.test(found.id)) {
-        throw new Error("TempFile не подтвердил файл " + ref.file.name);
+        throw uiError(()=>t("TempFile не подтвердил файл ") + ref.file.name);
       }
     }
     for (const {ref,uploadName} of files) {
@@ -97,13 +97,13 @@ const Router = (() => {
       }
       if (job.status === "completed") return job;
       if (["failed","cancelled","canceled","expired"].includes(job.status)) {
-        const e = new Error("Видео не готово ("+job.status+"). "+(job.error?.message || job.error || ""));
+        const e = uiError(()=>t("Видео не готово (")+job.status+"). "+(job.error?.message || job.error || ""));
         e.terminal = true; throw e;
       }
       progress(job.status === "pending" || job.status === "queued" ? "Видео в очереди OpenRouter…" : "Идёт генерация видео…");
       await pause(6000);
     }
-    throw new Error("Задача ещё выполняется. Можно проверить её готовность позже.");
+    throw uiError(()=>t("Задача ещё выполняется. Можно проверить её готовность позже."));
   }
   return {request, outputTokens, inputs, poll, upload};
 })();

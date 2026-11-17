@@ -57,17 +57,17 @@ try{
   }
 }catch{}
 const drafts={image:{},video:{}};
-const money = n => "$"+Number(n).toLocaleString("ru-RU",{minimumFractionDigits:2,maximumFractionDigits:4});
+const money = n => "$"+Number(n).toLocaleString(uiLocale(),{minimumFractionDigits:2,maximumFractionDigits:4});
 function node(tag,txt,cls){const x=document.createElement(tag);if(txt!==undefined)x.textContent=txt;if(cls)x.className=cls;return x;}
-function button(txt,handler,cls="secondary"){const b=node("button",txt,cls);b.type="button";b.onclick=handler;return b;}
+function button(txt,handler,cls="secondary"){const b=node("button",t(txt),cls);if(Object.hasOwn(english,txt))b.dataset.label=txt;b.type="button";b.onclick=handler;return b;}
 function opts(id,values,preferred){
-  $(id).replaceChildren(...values.map(v=>Array.isArray(v)?new Option(v[1],v[0]):new Option(v,v)));
+  $(id).replaceChildren(...values.map(v=>Array.isArray(v)?new Option(t(v[1]),v[0]):new Option(v,v)));
   if([...$(id).options].some(o=>o.value===String(preferred)))$(id).value=preferred;
 }
 function videoOptions(size,duration,ratio){
   const model=videoModels[$("model").value];
   opts("size",model.supported_resolutions,size||"720p");
-  opts("quality",model.supported_durations.filter(n=>n>0).map(n=>[n,n+" сек"]),duration||"5");
+  opts("quality",model.supported_durations.filter(n=>n>0).map(n=>[n,n+t(" сек")]),duration||"5");
   opts("ratio",model.supported_aspect_ratios,ratio||"16:9");
 }
 function setMode(next,initial=false){
@@ -76,7 +76,7 @@ function setMode(next,initial=false){
   mode=next;const d=drafts[mode],video=mode==="video";
   $("imageTab").setAttribute("aria-pressed",!video);$("videoTab").setAttribute("aria-pressed",video);
   opts("model",Object.entries(modelNames).filter(([id])=>video===Object.hasOwn(videoModels,id)),d.model);
-  $("sizeLabel").textContent=video?"Разрешение":"Размер кадра";$("qualityLabel").textContent=video?"Длительность":"Качество";
+  $("sizeLabel").textContent=video?t("Разрешение"):t("Размер кадра");$("qualityLabel").textContent=video?t("Длительность"):t("Качество");
   if(video)videoOptions(d.size,d.quality,d.ratio);
   else{
     opts("size",imageSizes.map(x=>[x,x.replace("x"," × ")]),d.size||"1536x864");
@@ -85,8 +85,8 @@ function setMode(next,initial=false){
   $("sound").value=d.sound||"on";
   $("videoExtra").hidden=!video;$("prompt").value=d.prompt||"";$("prompt").maxLength=video?20000:32000;
   $("files").accept=video?".jpg,.jpeg,.png,.webp,.bmp,.mp4,.mov,.wav,.mp3":".jpg,.jpeg,.png,.webp";
-  $("mentionHint").textContent=video?"В промпте можно писать img1, video1 и audio1. Введите @ для выбора.":"В промпте можно писать img1, img2 и дальше. Введите @ для выбора.";
-  $("fileHint").textContent=video?"Фото, MP4, MOV, MP3, WAV. При генерации файлы попадут в TempFile по открытой ссылке на 6 часов.":"JPG, PNG, WebP · до 16 изображений";
+  $("mentionHint").textContent=video?t("В промпте можно писать img1, video1 и audio1. Введите @ для выбора."):t("В промпте можно писать img1, img2 и дальше. Введите @ для выбора.");
+  $("fileHint").textContent=video?t("Фото, MP4, MOV, MP3, WAV. При генерации файлы попадут в TempFile по открытой ссылке на 6 часов."):t("JPG, PNG, WebP · до 16 изображений");
   $("fileError").textContent="";drawRefs();mentionEditor?.close();refresh();
 }
 function estimate(){
@@ -107,20 +107,20 @@ function estimate(){
   return Router.outputTokens($("size").value,$("quality").value)*rate;
 }
 function refresh(){
-  $("count").textContent=$("prompt").value.length.toLocaleString("ru-RU");
-  const cost=estimate();$("estimate").textContent=Number.isFinite(cost)?"≈ "+money(cost):"Нет тарифа";
-  $("generate").disabled=checking;
+  $("count").textContent=$("prompt").value.length.toLocaleString(uiLocale());
+  const cost=estimate();$("estimate").textContent=Number.isFinite(cost)?"≈ "+money(cost):t("Нет тарифа");
+  $("generate").disabled=checking;$("language").disabled=checking;
 }
 function showSamples(){
-  const list=node("div",undefined,"sample-list");openDialog("Примеры промптов").append(list);
+  const list=node("div",undefined,"sample-list");openDialog(t("Примеры промптов")).append(list);
   for(const s of samples){
     const choose=button("",()=>{
-      $("prompt").value=s.prompt+(mode==="video"?" "+s.motion:"");
+      $("prompt").value=t(s.prompt)+(mode==="video"?" "+t(s.motion):"");
       $("prompt").setCustomValidity("");mentionEditor.paint();mentionEditor.close();refresh();
       $("modal").close();$("prompt").focus();
     },"sample-choice");
     const image=node("img");image.src="assets/"+s.file+".jpg";image.alt="";
-    choose.append(image,node("span",s.title));list.append(choose);
+    choose.append(image,node("span",t(s.title)));list.append(choose);
   }
 }
 function clearDialog(){
@@ -136,9 +136,9 @@ function feedback(text,error=false){
   $("feedback").textContent=text;$("feedback").hidden=!text;$("feedback").classList.toggle("error",error);
 }
 function accountLabel(){
-  if(Number.isFinite(account?.balance))return "Баланс "+money(account.balance);
-  if(Number.isFinite(account?.limit))return "Лимит "+money(account.limit);
-  return key?"Баланс н/д":"Баланс —";
+  if(Number.isFinite(account?.balance))return t("Баланс ")+money(account.balance);
+  if(Number.isFinite(account?.limit))return t("Лимит ")+money(account.limit);
+  return key?t("Баланс н/д"):t("Баланс —");
 }
 async function accountData(token){
   const [info,credits]=await Promise.allSettled([Router.request("/key",token),Router.request("/credits",token)]);
@@ -152,31 +152,31 @@ async function syncAccount(){
   $("balance").textContent=accountLabel();
 }
 function showKey(){
-  const body=openDialog("Ключ OpenRouter");body.append($("keyForm").content.cloneNode(true));
-  const f=body.querySelector("form"),input=f.querySelector("input");if(key)input.placeholder="Подключён ···· "+key.slice(-4);
+  const body=openDialog(t("Ключ OpenRouter"));body.append($("keyForm").content.cloneNode(true));
+  const f=body.querySelector("form"),input=f.querySelector("input");if(key)input.placeholder=t("Подключён ···· ")+key.slice(-4);
   if(key)body.append(button("Отключить ключ",()=>{key="";account=null;session.set("key",null);$("balance").textContent=accountLabel();$("modal").close();}));
   f.onsubmit=async e=>{
     e.preventDefault();const token=input.value.trim();if(!token)return;
-    const b=f.querySelector(".primary");b.disabled=true;b.textContent="Проверяем…";
+    const b=f.querySelector(".primary");b.disabled=true;b.textContent=t("Проверяем…");
     try{const next=await accountData(token);key=token;account=next;session.set("key",token);input.value="";
-      $("balance").textContent=accountLabel();$("modal").close();feedback("Ключ подключён. Можно начать генерацию.");}
-    catch(err){f.querySelector(".message").textContent=err.message;}finally{b.disabled=false;b.textContent="Подключить";}
+      $("balance").textContent=accountLabel();$("modal").close();feedback(t("Ключ подключён. Можно начать генерацию."));}
+    catch(err){f.querySelector(".message").textContent=err.message;}finally{b.disabled=false;b.textContent=t("Подключить");}
   };input.focus();
 }
 function showBalance(){
   if(!key)return showKey();
-  const body=openDialog("Баланс OpenRouter");
-  body.append(node("p",Number.isFinite(account?.balance)?"На аккаунте "+money(account.balance):"Баланс аккаунта недоступен с этим ключом.","detail"));
-  if(Number.isFinite(account?.limit))body.append(node("p","Остаток лимита ключа "+money(account.limit),"detail"));
-  if(Number.isFinite(account?.usage))body.append(node("p","Потрачено этим ключом "+money(account.usage),"detail"));
-  const a=node("a","Открыть кредиты OpenRouter ↗");a.href="https://openrouter.ai/settings/credits";a.target="_blank";a.rel="noreferrer";body.append(a);
+  const body=openDialog(t("Баланс OpenRouter"));
+  body.append(node("p",Number.isFinite(account?.balance)?t("На аккаунте ")+money(account.balance):t("Баланс аккаунта недоступен с этим ключом."),"detail"));
+  if(Number.isFinite(account?.limit))body.append(node("p",t("Остаток лимита ключа ")+money(account.limit),"detail"));
+  if(Number.isFinite(account?.usage))body.append(node("p",t("Потрачено этим ключом ")+money(account.usage),"detail"));
+  const a=node("a",t("Открыть кредиты OpenRouter ↗"));a.href="https://openrouter.ai/settings/credits";a.target="_blank";a.rel="noreferrer";body.append(a);
 }
 function priceInfo(){
-  const b=openDialog("Как считается стоимость");
-  const details = { [WAN]:"Длительность ролика умножается на тариф Wan 3.0 для выбранного разрешения. Провайдер может дополнительно учитывать входное видео.",
-    [SEEDANCE]:"Seedance 2.5 тарифицируется по видеотокенам. Оценка учитывает размеры кадра, 24 кадра в секунду и длину ролика. При наличии видеореференсов также учитываются их длительность, отдельная ставка и минимальный объём списания." };
-  b.append(node("p",details[$("model").value]||"Оценка рендера учитывает размер кадра, качество и цену выходных токенов. Текст и входные изображения оплачиваются дополнительно.","detail"));
-  b.append(node("p","Фактическая сумма из ответа OpenRouter появится в истории после генерации.","detail"));
+  const b=openDialog(t("Как считается стоимость"));
+  const details = { [WAN]:t("Длительность ролика умножается на тариф Wan 3.0 для выбранного разрешения. Провайдер может дополнительно учитывать входное видео."),
+    [SEEDANCE]:t("Seedance 2.5 тарифицируется по видеотокенам. Оценка учитывает размеры кадра, 24 кадра в секунду и длину ролика. При наличии видеореференсов также учитываются их длительность, отдельная ставка и минимальный объём списания.") };
+  b.append(node("p",details[$("model").value]||t("Оценка рендера учитывает размер кадра, качество и цену выходных токенов. Текст и входные изображения оплачиваются дополнительно."),"detail"));
+  b.append(node("p",t("Фактическая сумма из ответа OpenRouter появится в истории после генерации."),"detail"));
 }
 function setRefOrder(next){
   renumberReferences(refs[mode],next,$("prompt"));
@@ -186,9 +186,9 @@ function setRefOrder(next){
 function labelRef(row,ref){
   const tag=row.querySelector(".ref-tag");
   tag.textContent=ref.tag;
-  tag.title="Вставить @"+ref.tag+" в промпт";
-  row.querySelector(".ref-remove").setAttribute("aria-label","Убрать "+ref.tag);
-  row.querySelector(".ref-grip").setAttribute("aria-label","Переместить "+ref.tag);
+  tag.title=t("Вставить @")+ref.tag+t(" в промпт");
+  row.querySelector(".ref-remove").setAttribute("aria-label",t("Убрать ")+ref.tag);
+  row.querySelector(".ref-grip").setAttribute("aria-label",t("Переместить ")+ref.tag);
 }
 function moveReference(ref,to){
   const current=refs[mode],from=current.indexOf(ref);
@@ -288,7 +288,7 @@ function drawRefs(){
     const row=node("div",undefined,"ref-card"),details=node("div",undefined,"ref-details");
     const grip=node("button","⠿","ref-grip");grip.type="button";
     grip.disabled=refs[mode].length<2;
-    grip.title="Перетащите или переместите стрелками ↑ и ↓";
+    grip.title=t("Перетащите или переместите стрелками ↑ и ↓");
     grip.onkeydown=e=>{
       if(e.key!=="ArrowUp" && e.key!=="ArrowDown")return;
       e.preventDefault();
@@ -300,9 +300,9 @@ function drawRefs(){
       thumb=button("▶",async()=>{
         if(audioPreview===audio && !audio.paused){audio.pause();return;}
         audioPreview?.pause();audioPreview=audio;audio.src=ref.preview;
-        try{await audio.play();}catch{$("fileError").textContent="Не удалось воспроизвести "+ref.file.name;}
+        try{await audio.play();}catch{$("fileError").textContent=t("Не удалось воспроизвести ")+ref.file.name;}
       },"ref-thumb ref-audio");
-      thumb.setAttribute("aria-label","Прослушать "+ref.file.name);
+      thumb.setAttribute("aria-label",t("Прослушать ")+ref.file.name);
       audio.onplay=()=>{thumb.textContent="Ⅱ";};audio.onpause=audio.onended=()=>{thumb.textContent="▶";};
     }else{
       thumb=node(ref.kind==="video"?"video":"img",undefined,"ref-thumb");
@@ -316,7 +316,7 @@ function drawRefs(){
       thumb.onpointerleave=thumb.onpointerdown=thumb.onblur=hideRefPreview;
     }
     const tag=button(ref.tag,()=>mentionEditor.insert(ref),"ref-tag");
-    const caption=node("span",[ref.w && ref.h ? ref.w+" × "+ref.h : "",ref.duration ? ref.duration.toLocaleString("ru-RU",{maximumFractionDigits:1})+" с" : ""].filter(Boolean).join(" · "),"ref-name");
+    const caption=node("span",[ref.w && ref.h ? ref.w+" × "+ref.h : "",ref.duration ? ref.duration.toLocaleString(uiLocale(),{maximumFractionDigits:1})+t(" с") : ""].filter(Boolean).join(" · "),"ref-name");
     row.title=ref.file.name;
     details.append(tag,caption);row.append(grip,thumb,details);
     const remove=button("×",()=>{
@@ -332,7 +332,7 @@ async function mediaInfo(file,kind){
   try{return await new Promise((resolve,reject)=>{
     const el=kind==="image"?new Image():document.createElement(kind);
     const timer=setTimeout(()=>fail(),12000);
-    function fail(){clearTimeout(timer);reject(new Error("Браузер не смог прочитать "+file.name+". Проверьте формат и кодек."));}
+    function fail(){clearTimeout(timer);reject(uiError(()=>t("Браузер не смог прочитать ")+file.name+t(". Проверьте формат и кодек.")));}
     function done(){clearTimeout(timer);resolve({duration:el.duration||0,w:el.naturalWidth||el.videoWidth||0,h:el.naturalHeight||el.videoHeight||0});}
     el.onerror=fail;if(kind==="image")el.onload=done;else{el.preload="metadata";el.onloadedmetadata=done;}el.src=url;
   });}finally{URL.revokeObjectURL(url);}
@@ -344,18 +344,18 @@ function referenceError(list,model){
   for(const ref of list){
     const {kind,file,duration,w,h}=ref;
     const mb=kind==="video"?100:kind==="audio"?15:seed?30:video?20:50;
-    if(!file.size||file.size>mb*1e6)return file.name+" — допустим непустой файл до "+mb+" МБ.";
-    if(++total[kind]>limits[kind])return "Превышен лимит референсов этого типа для "+modelNames[model]+" ("+limits[kind]+").";
+    if(!file.size||file.size>mb*1e6)return file.name+t(" — допустим непустой файл до ")+mb+t(" МБ.");
+    if(++total[kind]>limits[kind])return t("Превышен лимит референсов этого типа для ")+modelNames[model]+" ("+limits[kind]+").";
     if(!video)continue;
     if(kind!=="image"){
       seconds[kind]+=duration;
       const min=seed?2:1, max=seed?30:15;
-      if(!Number.isFinite(duration)||duration<min || seconds[kind]>max+0.02)return file.name+" — каждый клип от "+min+" с, всего до "+max+" с для этого типа.";
+      if(!Number.isFinite(duration)||duration<min || seconds[kind]>max+0.02)return file.name+t(" — каждый клип от ")+min+t(" с, всего до ")+max+t(" с для этого типа.");
     }
     if(w){
       const min=seed?300:240,max=seed?6000:kind==="image"?8000:4096;
-      if(Math.min(w,h)<min || Math.max(w,h)>max || Math.max(w,h)/Math.min(w,h)>(seed?2.5:8))return file.name+" — размеры кадра не подходят для "+modelNames[model]+".";
-      if(seed && kind==="video" && (w*h<407696 || w*h>8295044))return file.name+" — для видеореференса требуется от 407 696 до 8 295 044 пикселей в кадре.";
+      if(Math.min(w,h)<min || Math.max(w,h)>max || Math.max(w,h)/Math.min(w,h)>(seed?2.5:8))return file.name+t(" — размеры кадра не подходят для ")+modelNames[model]+".";
+      if(seed && kind==="video" && (w*h<407696 || w*h>8295044))return file.name+t(" — для видеореференса требуется от 407 696 до 8 295 044 пикселей в кадре.");
     }
   }
   return "";
@@ -367,7 +367,7 @@ async function addFiles(files){
     try{
       const ext=file.name.split(".").pop().toLowerCase();
       const kind=["jpg","jpeg","png","webp",...(mode==="video"?["bmp"]:[])].includes(ext)?"image":["mp4","mov"].includes(ext)?"video":["mp3","wav"].includes(ext)?"audio":null;
-      if(!kind || (mode==="image" && kind!=="image"))throw new Error("Формат файла не поддерживается.");
+      if(!kind || (mode==="image" && kind!=="image"))throw uiError(()=>t("Формат файла не поддерживается."));
       const info=await mediaInfo(file,kind);
       const ref={file,kind,...info},error=referenceError([...all,...accepted,ref],$("model").value);
       if(error)throw new Error(error);
@@ -382,23 +382,23 @@ async function addFiles(files){
 function fileName(item,blob){
   const type=blob.type.split(";")[0];
   const ext={"image/jpeg":"jpg","image/webp":"webp","video/quicktime":"mov","video/webm":"webm"}[type]||(item.mode==="video"?"mp4":"png");
-  return "Кадр-"+new Date(item.created).toISOString().replace(/[:.]/g,"-")+"."+ext;
+  return t("Кадр-")+new Date(item.created).toISOString().replace(/[:.]/g,"-")+"."+ext;
 }
 async function resultBlob(item,availableBlob){
   const blob=availableBlob||await Library.media(item.id);
-  if(!blob)throw new Error("Файл этой генерации недоступен в истории.");
+  if(!blob)throw uiError(()=>t("Файл этой генерации недоступен в истории."));
   return blob;
 }
 function openResult(item,blob){
-  const body=openDialog("Результат генерации",true),video=item.mode==="video";
+  const body=openDialog(t("Результат генерации"),true),video=item.mode==="video";
   const media=node(video?"video":"img");modalMediaUrl=URL.createObjectURL(blob);media.src=modalMediaUrl;
   if(video){media.controls=true;media.playsInline=true;}else media.alt=item.prompt;
-  const foot=node("div",undefined,"dlg-foot"),link=node("a","Скачать");
+  const foot=node("div",undefined,"dlg-foot"),link=node("a",t("Скачать"));
   link.href=modalMediaUrl;link.download=fileName(item,blob);
   foot.append(link,reuseButton(item,blob),node("span",costLabel(item),"mono"));
   body.append(media,node("p",item.prompt,"detail"),foot);
 }
-function costLabel(item){return item.cost==null?"Сумма уточняется":money(item.cost);}
+function costLabel(item){return item.cost==null?t("Сумма уточняется"):money(item.cost);}
 function reuseButton(item,availableBlob){
   const action=button("В референсы",async()=>{
     const parent=action.parentElement,dialog=action.closest("dialog");
@@ -406,14 +406,14 @@ function reuseButton(item,availableBlob){
     try{
       const blob=await resultBlob(item,availableBlob);
       if(!action.isConnected || (dialog && !dialog.open))return;
-      if(checking)throw new Error("Дождитесь завершения текущей операции.");
+      if(checking)throw uiError(()=>t("Дождитесь завершения текущей операции."));
       if(item.mode==="video" && mode!=="video")setMode("video");
       const file=new File([blob],fileName(item,blob),{type:blob.type});
       const added=await addFiles([file]);
-      if(!added.length)throw new Error($("fileError").textContent||"Не удалось добавить файл.");
+      if(!added.length)throw new Error($("fileError").textContent||t("Не удалось добавить файл."));
       if(dialog?.open)dialog.close();
       $("prompt").focus();
-      feedback((item.mode==="video"?"Видео добавлено":"Фото добавлено")+" как "+added[0].tag+".");
+      feedback((item.mode==="video"?t("Видео добавлено"):t("Фото добавлено"))+t(" как ")+added[0].tag+".");
     }catch(e){const message=node("span",e.message,"history-error");message.setAttribute("role","status");parent.append(message);}
     finally{action.disabled=false;}
   },"secondary history-ref");
@@ -464,10 +464,10 @@ function createFeed(){
     filters.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.kind===filter));
     $("feedCount").textContent=String(count);
     $("feedSpend").hidden=!finished;
-    $("feedSpend").textContent=unpriced && unpriced===finished?"Стоимость генераций уточняется":"Списано за все генерации: "+money(total)+(unpriced?" · часть списаний уточняется":"");
+    $("feedSpend").textContent=unpriced && unpriced===finished?t("Стоимость генераций уточняется"):t("Списано за все генерации: ")+money(total)+(unpriced?t(" · часть списаний уточняется"):"");
     $("feedEmpty").hidden=count>0;
-    $("emptyTitle").textContent=filter==="all"?"Здесь появятся ваши работы":filter==="video"?"Пока нет видео":"Пока нет изображений";
-    $("emptyText").textContent=filter==="all"?"Создайте изображение или видео в студии.":"Готовые работы этого типа появятся здесь.";
+    $("emptyTitle").textContent=filter==="all"?t("Здесь появятся ваши работы"):filter==="video"?t("Пока нет видео"):t("Пока нет изображений");
+    $("emptyText").textContent=filter==="all"?t("Создайте изображение или видео в студии."):t("Готовые работы этого типа появятся здесь.");
   }
   function forget(marker){
     const id=marker.id,card=cards.get(id);
@@ -482,10 +482,10 @@ function createFeed(){
   }
   function announceRemoval(marker){forget(marker);channel?.postMessage(marker);}
   function askRemove(card){
-    const body=openDialog("Удалить из ленты?");
+    const body=openDialog(t("Удалить из ленты?"));
     body.append(node("p",card.item.prompt,"generation-prompt"));
-    const text=card.ready?"Файл и промпт будут удалены из истории этого браузера.":"Карточка исчезнет из истории этого браузера.";
-    body.append(node("p",text+(card.inFlight?" Запущенный запрос может завершиться со списанием в OpenRouter.":""),"detail"));
+    const text=card.ready?t("Файл и промпт будут удалены из истории этого браузера."):t("Карточка исчезнет из истории этого браузера.");
+    body.append(node("p",text+(card.inFlight?t(" Запущенный запрос может завершиться со списанием в OpenRouter."):""),"detail"));
     const actions=node("div",undefined,"dlg-foot"),cancel=button("Оставить",()=>$("modal").close());
     const error=node("span",undefined,"history-error");error.setAttribute("role","status");
     const confirm=button("Удалить",async()=>{
@@ -494,7 +494,7 @@ function createFeed(){
         const marker=await Library.remove(card.item,card.ready);
         announceRemoval(marker);
         if(actions.isConnected && $("modal").open)$("modal").close();
-      }catch{error.textContent="Удаление не удалось. Проверьте доступ к хранилищу браузера и повторите.";confirm.disabled=false;}
+      }catch{error.textContent=t("Удаление не удалось. Проверьте доступ к хранилищу браузера и повторите.");confirm.disabled=false;}
     },"secondary remove-confirm");
     actions.append(cancel,confirm,error);body.append(actions);cancel.focus();
   }
@@ -502,7 +502,7 @@ function createFeed(){
     if(cards.has(item.id))return cards.get(item.id);
     const el=node("article",undefined,"generation-card"),frame=node("div",undefined,"generation-media");
     const details=node("div",undefined,"generation-details"),meta=node("div",undefined,"generation-meta");
-    const cost=node("span"),date=new Date(item.created),time=node("time",date.toLocaleString("ru-RU",{dateStyle:"short",timeStyle:"short"}));
+    const cost=node("span"),date=new Date(item.created),time=node("time",date.toLocaleString(uiLocale(),{dateStyle:"short",timeStyle:"short"}));
     time.dateTime=date.toISOString();meta.append(node("span",modelNames[item.model]||item.model),cost);
     details.append(meta,node("p",item.prompt,"generation-prompt"),time);
     const actions=node("div",undefined,"generation-actions");
@@ -519,17 +519,19 @@ function createFeed(){
     if(card.ready)return;
     card.frame.classList.add("working-frame");
     const spin=node("span",undefined,"job-spinner");spin.setAttribute("aria-hidden","true");
-    card.status=node("span","Подготовка…","job-status");card.status.setAttribute("role","status");
+    card.statusKey="Подготовка…";card.status=node("span",t(card.statusKey),"job-status");card.status.setAttribute("role","status");
     card.inFlight=true;
     card.frame.replaceChildren(spin,card.status);card.actions.replaceChildren(card.remove);card.actions.hidden=false;
     if(filter!=="all" && filter!==item.mode)filter="all";
     updateFilter();$("feed").scrollTop=0;
   }
-  function progress(id,message){const card=cards.get(id);if(card?.status && !card.ready)card.status.textContent=message;}
+  function progress(id,message){const card=cards.get(id);if(card?.status && !card.ready){card.statusKey=message;card.status.textContent=t(message);}}
   function fail(id,message,recheck){
     const card=cards.get(id);if(!card || card.ready)return;
-    card.frame.replaceChildren(node("span",recheck?"Проверка приостановлена":"Ошибка","job-state"));
-    const info=node("span",message,"history-error");info.setAttribute("role","status");
+    card.status=null;card.stateKey=recheck?"Проверка приостановлена":"Ошибка";
+    card.frame.replaceChildren(node("span",t(card.stateKey),"job-state"));
+    card.failure=typeof message==="function"?message:()=>t(message);
+    const info=node("span",card.failure(),"history-error");info.setAttribute("role","status");
     card.actions.hidden=false;card.actions.replaceChildren(info);
     card.inFlight=Boolean(recheck);
     if(recheck)card.actions.append(button("Проверить готовность",recheck));
@@ -548,7 +550,7 @@ function createFeed(){
       try{await handler(await resultBlob(item,blob));}catch(e){error.textContent=e.message;}
     }
     const expand=button("",()=>withFile(file=>openResult(item,file)),"icon-btn expand-result");
-    expand.setAttribute("aria-label","Открыть результат");const icon=node("i");icon.dataset.i="expand";expand.append(icon);
+    expand.setAttribute("aria-label",t("Открыть результат"));const icon=node("i");icon.dataset.i="expand";expand.append(icon);
     const download=button("Скачать",()=>withFile(file=>{
       const link=node("a"),url=URL.createObjectURL(file);link.href=url;link.download=fileName(item,file);
       document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
@@ -556,7 +558,7 @@ function createFeed(){
     card.ready=true;card.inFlight=false;card.item=item;card.blob=blob;card.error=error;card.media=media;card.status=null;
     card.cost.textContent=costLabel(item);frame.classList.remove("working-frame");
     actions.hidden=false;actions.replaceChildren(download,reuseButton(item,blob),card.remove,error);
-    if(blob)error.textContent="Не удалось сохранить в историю. Скачайте файл до закрытия вкладки.";
+    if(blob)error.textContent=t("Не удалось сохранить в историю. Скачайте файл до закрытия вкладки.");
     frame.replaceChildren(media,expand);observer.observe(el);paintIcons(el);
   }
   filters.onclick=e=>{const btn=e.target.closest("button[data-kind]");if(btn){filter=btn.dataset.kind;updateFilter();}};
@@ -565,25 +567,41 @@ function createFeed(){
       for(const item of items)if(item.deleted && !removed.has(item.id))removed.set(item.id,item);
       for(const item of items.filter(i=>!i.deleted).sort((a,b)=>b.created-a.created))insert(item);
       $("feedStatus").textContent="";
-    }catch{$("feedStatus").textContent="Не удалось прочитать историю этого браузера.";}
+    }catch{$("feedStatus").textContent=t("Не удалось прочитать историю этого браузера.");}
     updateFilter();
   }
   function add(item,blob){insert(item,blob);updateFilter();}
-  return {load,add,start,progress,fail,announceRemoval,isRemoved:id=>removed.has(id),isReady:id=>cards.get(id)?.ready};
+  function changeLanguage(){
+    for(const card of cards.values()){
+      const time=card.el.querySelector("time");
+      time.textContent=new Date(card.item.created).toLocaleString(uiLocale(),{dateStyle:"short",timeStyle:"short"});
+      if(card.ready){
+        card.cost.textContent=costLabel(card.item);
+        card.el.querySelector(".expand-result").setAttribute("aria-label",t("Открыть результат"));
+        if(card.blob)card.error.textContent=t("Не удалось сохранить в историю. Скачайте файл до закрытия вкладки.");
+      }else if(card.status)card.status.textContent=t(card.statusKey);
+      else if(card.failure){
+        card.frame.querySelector(".job-state").textContent=t(card.stateKey);
+        card.actions.querySelector(".history-error").textContent=card.failure();
+      }
+    }
+    updateFilter();
+  }
+  return {changeLanguage,load,add,start,progress,fail,announceRemoval,isRemoved:id=>removed.has(id),isReady:id=>cards.get(id)?.ready};
 }
 function historyThumbnail(item){
   if(item.mode!=="image")return node("span","▷","history-thumb");
   const img=node("img",undefined,"history-thumb");
-  img.alt="Миниатюра изображения";img.dataset.recordId=item.id;
+  img.alt=t("Миниатюра изображения");img.dataset.recordId=item.id;
   historyObserver.observe(img);
   return img;
 }
 async function chooseSavedImage(){
   const body=node("div");
-  openDialog("Фото из истории").append(body);
+  openDialog(t("Фото из истории")).append(body);
   try{const items=(await Library.records()).filter(i=>i.mode==="image").sort((a,b)=>b.created-a.created);
     if(!body.isConnected)return;
-    if(!items.length){body.append(node("p","Здесь появятся сгенерированные вами изображения.","detail"));return;}
+    if(!items.length){body.append(node("p",t("Здесь появятся сгенерированные вами изображения."),"detail"));return;}
     historyObserver=new IntersectionObserver((entries,observer)=>{
       entries.forEach(async entry=>{
         if(!entry.isIntersecting)return;
@@ -594,16 +612,16 @@ async function chooseSavedImage(){
             const url=URL.createObjectURL(blob);
             img.onload=img.onerror=()=>URL.revokeObjectURL(url);img.src=url;
           }
-        }catch{img.alt="Миниатюра недоступна";}
+        }catch{img.alt=t("Миниатюра недоступна");}
       });
     },{root:$("modal"),rootMargin:"120px"});
     for(const item of items){
-      const row=node("div",undefined,"history-item"),info=node("div");info.append(node("strong",item.prompt),node("small",modelNames[item.model]+" · "+new Date(item.created).toLocaleString("ru-RU")+" · "+(item.cost===null?"сумма уточняется":money(item.cost))));
+      const row=node("div",undefined,"history-item"),info=node("div");info.append(node("strong",item.prompt),node("small",modelNames[item.model]+" · "+new Date(item.created).toLocaleString(uiLocale())+" · "+(item.cost===null?t("сумма уточняется"):money(item.cost))));
       const actions=node("div",undefined,"history-actions");
       actions.append(reuseButton(item));
       row.append(historyThumbnail(item),info,actions);body.append(row);
     }
-  }catch{body.append(node("p","Браузер не предоставил доступ к локальной истории.","detail"));}
+  }catch{body.append(node("p",t("Браузер не предоставил доступ к локальной истории."),"detail"));}
 }
 async function actual(result,token){
   const cost=result.usage?.cost ?? result.usage?.total_cost;
@@ -638,8 +656,8 @@ async function finishVideo(record,token){
 function reportFailure(item,err,unknown=false){
   if(err.terminal){pendingVideos.delete(item.id);savePending();}
   const record=pendingVideos.get(item.id);
-  const message=err.message==="Failed to fetch"?"Не удалось связаться с сервисом. Проверьте соединение.":err.message;
-  generationFeed?.fail(item.id,message+(unknown?" Перед повторной отправкой проверьте Activity в OpenRouter.":""),record?()=>resumeVideo(record):null);
+  const message=()=>err.message==="Failed to fetch"?t("Не удалось связаться с сервисом. Проверьте соединение."):err.message;
+  generationFeed?.fail(item.id,()=>message()+(unknown?t(" Перед повторной отправкой проверьте Activity в OpenRouter."):""),record?()=>resumeVideo(record):null);
 }
 async function resumeVideo(record){
   const {item}=record,token=key;
@@ -663,19 +681,19 @@ function canAfford(price,token){
 async function generate(event){
   event.preventDefault();if(checking)return;
   if(!key){showKey();return;}
-  const prompt=$("prompt").value.trim();if(!prompt){$("prompt").setCustomValidity("Опишите сцену.");$("prompt").reportValidity();return;}
+  const prompt=$("prompt").value.trim();if(!prompt){$("prompt").setCustomValidity(t("Опишите сцену."));$("prompt").reportValidity();return;}
   const ref=refs[mode].slice(),model=$("model").value,video=mode==="video",duration=Number($("quality").value);
   const resolved=resolvePrompt(prompt,ref);
-  if(resolved.missing.length){feedback("Упоминание без вложения: "+resolved.missing.join(", ")+". Удалите его или выберите референс через @.",true);$("prompt").focus();return;}
+  if(resolved.missing.length){feedback(t("Упоминание без вложения: ")+resolved.missing.join(", ")+t(". Удалите его или выберите референс через @."),true);$("prompt").focus();return;}
   const invalid=referenceError(ref,model);if(invalid){feedback(invalid,true);return;}
-  if(model===WAN && duration+ref.filter(r=>r.kind==="video").reduce((n,r)=>n+r.duration,0)>30.02){feedback("Входные видео и готовый ролик вместе должны длиться не больше 30 секунд. Уменьшите длительность.",true);return;}
+  if(model===WAN && duration+ref.filter(r=>r.kind==="video").reduce((n,r)=>n+r.duration,0)>30.02){feedback(t("Входные видео и готовый ролик вместе должны длиться не больше 30 секунд. Уменьшите длительность."),true);return;}
   const token=key,price=estimate()||0;
   if(!canAfford(price,token)){
-    const notice="С учётом текущих задач доступного остатка недостаточно по оценке. Проверяем баланс OpenRouter.";
+    const notice=t("С учётом текущих задач доступного остатка недостаточно по оценке. Проверяем баланс OpenRouter.");
     feedback(notice,true);await syncAccount();
     if(key===token && $("feedback").textContent===notice){
       const enough=canAfford(price,token);
-      feedback(enough?"Баланс обновлён. Можно запускать генерацию.":"По оценке не хватает средств с учётом текущих задач. Дождитесь результата, измените настройки или пополните баланс.",!enough);
+      feedback(enough?t("Баланс обновлён. Можно запускать генерацию."):t("По оценке не хватает средств с учётом текущих задач. Дождитесь результата, измените настройки или пополните баланс."),!enough);
     }
     return;
   }
@@ -692,12 +710,12 @@ async function generate(event){
     progress(video?"Отправляем видео в очередь…":"Генерируем изображение…");
     submitting=true;const result=await Router.request(video?"/videos":"/images",token,payload);submitting=false;
     if(video){
-      if(!result.id)throw new Error("OpenRouter не вернул номер задачи. Проверьте Activity в OpenRouter.");
+      if(!result.id)throw uiError(()=>t("OpenRouter не вернул номер задачи. Проверьте Activity в OpenRouter."));
       const record={job:result.id,item};
       if(!generationFeed?.isRemoved?.(item.id)){pendingVideos.set(item.id,record);savePending();}
       await finishVideo(record,token);
     }else{
-      const image=result.data?.[0];if(!image?.b64_json)throw new Error("OpenRouter не вернул изображение. "+(result.error?.message||"Проверьте запрос в истории OpenRouter."));
+      const image=result.data?.[0];if(!image?.b64_json)throw uiError(()=>t("OpenRouter не вернул изображение. ")+(result.error?.message||t("Проверьте запрос в истории OpenRouter.")));
       const raw=atob(image.b64_json),bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));
       await finish(item,new Blob([bytes],{type:image.media_type||"image/png"}),result,token);
     }
@@ -728,6 +746,14 @@ async function refreshRates(){
   }
   refresh();
 }
+initializeLanguage();
+$("language").onchange=()=>{
+  setLanguage($("language").value);
+  setMode(mode);
+  $("prompt").setCustomValidity("");
+  feedback("");$("balance").textContent=accountLabel();generationFeed.changeLanguage();
+  document.querySelectorAll("button[data-label]").forEach(b=>{b.textContent=t(b.dataset.label);});
+};
 mentionEditor=createMentionEditor($("prompt"),$("promptMirror"),$("mentionChoices"),()=>refs[mode]);
 bindReferenceDragging();
 window.addEventListener("resize",hideRefPreview);

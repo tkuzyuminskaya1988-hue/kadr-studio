@@ -4,14 +4,14 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101210"><meta name="description" content="Кадр — рабочая студия для генерации изображений и видео через OpenRouter.">
   <title>Кадр / Студия генерации</title>
-  <link rel="icon" href="assets/mark.svg"><link rel="stylesheet" href="style.css?v=8">
-  <script defer src="api.js?v=4"></script><script defer src="mentions.js?v=3"></script><script defer src="app.js?v=8"></script>
+  <link rel="icon" href="assets/mark.svg"><link rel="stylesheet" href="style.css?v=9">
+  <script defer src="i18n.js?v=1"></script><script defer src="api.js?v=5"></script><script defer src="mentions.js?v=4"></script><script defer src="app.js?v=9"></script>
 </head>
 <body>
   <header>
     <div class="head-inner"><a class="brand" href="#studio" aria-label="Кадр — студия"><img src="assets/mark.svg" alt="">КАДР<span class="brand-slash">/</span></a>
     <nav><button id="studioNav" class="nav-item active"><i data-i="studio"></i>Студия</button></nav>
-    <div class="account"><button class="balance" id="balanceBtn"><i data-i="wallet"></i><span id="balance">Баланс —</span></button><button class="key-btn" id="openKey"><i data-i="key"></i><span>API-ключ</span></button></div></div>
+    <div class="account"><select id="language" aria-label="Язык интерфейса"><option value="ru" lang="ru">Русский</option><option value="en" lang="en">English</option></select><button class="balance" id="balanceBtn"><i data-i="wallet"></i><span id="balance">Баланс —</span></button><button class="key-btn" id="openKey"><i data-i="key"></i><span>API-ключ</span></button></div></div>
   </header>
   <main id="studio">
     <div class="workspace">

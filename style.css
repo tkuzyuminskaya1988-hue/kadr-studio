@@ -68,5 +68,7 @@ dialog{width:min(490px,calc(100% - 28px));max-height:85vh;padding:22px;border:1p
 .working-frame{background:#050605;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px;text-align:center}
 .job-spinner{width:36px;height:36px;border:3px solid #33382f;border-top-color:var(--green);border-radius:50%;animation:job-spin .9s linear infinite}
 .job-status,.job-state{font-size:12px;color:#c1c7bb;line-height:1.5}
+#language{width:auto;min-width:74px;font-size:12px;padding:6px 24px 6px 8px}
+@media(max-width:580px){.head-inner nav{display:none}.account{margin-left:auto}#language{min-width:66px}}
 @keyframes job-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.job-spinner{animation:none}}
